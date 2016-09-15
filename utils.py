@@ -4,6 +4,8 @@ import numpy as np
 import soundfile
 from numpy.lib.stride_tricks import as_strided
 
+logger = logging.getLogger(__name__)
+
 
 def calc_feat_dim(window, max_freq):
     return int(0.001 * window * max_freq) + 1
@@ -124,6 +126,7 @@ def save_model(save_dir, model, train_costs, validation_costs):
         train_costs (list(float))
         validation_costs (list(float))
     """
+    logger.info("Checkpointing model to: {}".format(save_dir))
     model_config_path = os.path.join(save_dir, 'model_config.json')
     with open(model_config_path, 'w') as model_config_file:
         model_json = model.to_json()
@@ -158,11 +161,11 @@ def configure_logging(console_log_level=logging.INFO,
     """
     if file_log_format is None:
         file_log_format = \
-            '%(asctime)s %(levelname)-6s (%(name)s) %(message)s'
+            '%(asctime)s %(levelname)-7s (%(name)s) %(message)s'
 
     if console_log_format is None:
         console_log_format = \
-            '%(asctime)s %(levelname)-6s (%(name)s) %(message)s'
+            '%(asctime)s %(levelname)-7s (%(name)s) %(message)s'
 
     # configure root logger level
     root_logger = logging.getLogger()

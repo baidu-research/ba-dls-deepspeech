@@ -133,7 +133,7 @@ class DataGenerator(object):
 
     def iterate(self, audio_paths, texts, minibatch_size,
                 max_iters=None):
-        k_iters = len(audio_paths) // minibatch_size
+        k_iters = int(np.ceil(len(audio_paths) / minibatch_size))
         logger.info("Iters: {}".format(k_iters))
         if max_iters is not None:
             k_iters = max_iters

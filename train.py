@@ -52,6 +52,7 @@ def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=16):
         mb_size (int): Size of each minibatch
     """
     train_costs, val_costs = [], []
+    iters = 0
     for e in range(epochs):
         sortagrad = e == 0
         for i, batch in \
@@ -69,10 +70,16 @@ def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=16):
             if i % 10 == 0:
                 logger.info("Epoch: {}, Iteration: {}, Loss: {}"
                             .format(e, i, ctc_cost, input_lengths))
-        # End of an epoch. Check validation cost and save costs
-        _, val_cost = validation(model, val_fn, datagen, mb_size)
-        val_costs.append(val_cost)
-        save_model(save_dir, train_costs, val_costs)
+            iters += 1
+            if iters % 500 == 0:
+                val_cost = validation(model, val_fn, datagen, mb_size)
+                val_costs.append(val_cost)
+                save_model(save_dir, model, train_costs, val_costs)
+        if iters % 500 != 0:
+            # End of an epoch. Check validation cost and save costs
+            val_cost = validation(model, val_fn, datagen, mb_size)
+            val_costs.append(val_cost)
+            save_model(save_dir, model, train_costs, val_costs)
 
 
 def main(desc_file, epochs, save_dir):
@@ -96,7 +103,7 @@ def main(desc_file, epochs, save_dir):
     val_fn = compile_val_fn(model)
 
     # Train the model
-    train(model, train_fn, val_fn, datagen)
+    train(model, train_fn, val_fn, datagen, save_dir)
 
 
 if __name__ == '__main__':

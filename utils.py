@@ -90,7 +90,8 @@ def specgram_real(samples, fft_length=256, sample_rate=2, hop_length=128):
     return x, freqs
 
 
-def spectrogram_from_file(filename, step=10, window=20, max_freq=None):
+def spectrogram_from_file(filename, step=10, window=20, max_freq=None,
+                          eps=1e-14):
     """ Calculate the linear spectrogram from FFT energy
     Params:
         filename (str): Path to the audio file
@@ -98,6 +99,7 @@ def spectrogram_from_file(filename, step=10, window=20, max_freq=None):
         window (int): FFT window size in milliseconds
         max_freq (int): Only FFT bins corresponding to frequencies between
             [0, max_freq] are returned
+        eps (float): Small value to ensure numerical stability (for ln(x))
     """
     with soundfile.SoundFile(filename) as sound_file:
         audio = sound_file.read(dtype='float32')
@@ -115,7 +117,7 @@ def spectrogram_from_file(filename, step=10, window=20, max_freq=None):
             audio, fft_length=fft_length, sample_rate=sample_rate,
             hop_length=hop_length)
         ind = np.where(freqs <= max_freq)[0][-1] + 1
-    return np.transpose(pxx[:ind, :])
+    return np.transpose(np.log(pxx[:ind, :] + eps))
 
 
 def save_model(save_dir, model, train_costs, validation_costs):

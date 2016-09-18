@@ -94,7 +94,7 @@ def main(desc_file, epochs, save_dir):
     datagen.fit_train(6)
 
     # Compile a model
-    model = compile_gru_model(recur_layers=3, nodes=500, batch_norm=True)
+    model = compile_gru_model(recur_layers=3, nodes=1000, batch_norm=True)
 
     # Compile the CTC training function
     train_fn = compile_train_fn(model)

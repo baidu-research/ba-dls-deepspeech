@@ -32,7 +32,7 @@ def validation(model, val_fn, datagen, mb_size=16):
         output_lengths = [model.conv_output_length(l)
                           for l in input_lengths]
         _, ctc_cost = val_fn([inputs, output_lengths, labels,
-                              label_lengths, False])
+                              label_lengths, True])
         avg_cost += ctc_cost
         i += 1
     return avg_cost / i

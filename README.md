@@ -34,8 +34,10 @@ This is a theano wrapper over warp-ctc.
 Follow the instructions on https://github.com/sherjilozair/ctc for installation.
 
 5. **Others**  
-You will need other common packages. Install them through `pip` as:  
-<code>pip install json soundfile</code>  
+You may require some additional packages. Install Python requirements through `pip` as:  
+<code>pip install soundfile</code>  
+On Ubuntu, `avconv` (used here for audio format conversions) requires `libav-tools`.  
+<code>sudo apt-get install libav-tools</code>  
 ## Data
 We will make use of the LibriSpeech ASR corpus to train our models. Use the `download.sh` script to download this corpus (~65GB). Use `flac_to_wav.sh` to convert any `flac` files to `wav`.  
 We make use of a JSON file that aggregates all data for training, validation and testing. Once you have a corpus, create a description file that is a json-line file in the following format:

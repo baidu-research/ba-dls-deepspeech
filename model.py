@@ -1,5 +1,4 @@
 import ctc
-import lasagne
 import logging
 import keras.backend as K
 
@@ -32,13 +31,9 @@ def compile_train_fn(model, learning_rate=1e-6):
     ctc_cost = ctc.cpu_ctc_th(network_output, output_lens,
                               label, label_lens).mean()
     trainable_vars = model.trainable_weights
-    #optimizer = SGD(nesterov=True, lr=learning_rate, momentum=0.9,
-    #                clipnorm=100)
-    #updates = optimizer.get_updates(trainable_vars, [], ctc_cost)
-    grads = K.gradients(ctc_cost, trainable_vars)
-    grads = lasagne.updates.total_norm_constraint(grads, 100)
-    updates = lasagne.updates.nesterov_momentum(grads, trainable_vars,
-                                                learning_rate, 0.99)
+    optimizer = SGD(nesterov=True, lr=learning_rate, momentum=0.9,
+                    clipnorm=100)
+    updates = optimizer.get_updates(trainable_vars, [], ctc_cost)
     train_fn = K.function([acoustic_input, output_lens, label, label_lens,
                            K.learning_phase()],
                           [network_output, ctc_cost],

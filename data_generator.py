@@ -6,7 +6,6 @@ import numpy as np
 import random
 
 from concurrent.futures import ThreadPoolExecutor, wait
-from functools import partial
 
 from char_map import char_map
 from utils import calc_feat_dim, spectrogram_from_file
@@ -31,10 +30,20 @@ class DataGenerator(object):
         self.feats_mean = np.zeros((self.feat_dim,))
         self.feats_std = np.ones((self.feat_dim,))
         self.rng = random.Random(RNG_SEED)
-        self.featurize = partial(spectrogram_from_file,
-                                 step=step, window=window, max_freq=max_freq)
         if desc_file is not None:
             self.load_metadata_from_desc_file(desc_file)
+        self.step = step
+        self.window = window
+        self.max_freq = max_freq
+
+    def featurize(self, audio_clip):
+        """ For a given audio clip, calculate the log of its Fourier Transform
+        Params:
+            audio_clip(str): Path to the audio clip
+        """
+        return spectrogram_from_file(
+            audio_clip, step=self.step, window=self.window,
+            max_freq=self.max_freq)
 
     def load_metadata_from_desc_file(self, desc_file, test_val_split=0.1):
         """ Read metadata from the description file
@@ -95,7 +104,7 @@ class DataGenerator(object):
         return int_sequence
 
     def prepare_minibatch(self, audio_paths, texts):
-        """ Feature a minibatch of audio, zero pad them and return a dictionary
+        """ Featurize a minibatch of audio, zero pad them and return a dictionary
         Params:
             audio_paths (list(str)): List of paths to audio files
             texts (list(str)): List of texts corresponding to the audio files
@@ -105,7 +114,9 @@ class DataGenerator(object):
         assert len(audio_paths) == len(texts),\
             "Inputs and outputs to the network must be of the same number"
         # Features is a list of (timesteps, feature_dim) arrays
-        features = map(self.featurize, audio_paths)
+        # Calculate the features for each audio clip, as the log of the
+        # Fourier Transform of the audio
+        features = [self.featurize(a) for a in audio_paths]
         input_lengths = [f.shape[0] for f in features]
         max_length = max(input_lengths)
         feature_dim = features[0].shape[1]
@@ -116,7 +127,7 @@ class DataGenerator(object):
         label_lengths = []
         for i in range(mb_size):
             feat = features[i]
-            feat = self.normalize(feat)  # Normalize using means and std
+            feat = self.normalize(feat)  # Center using means and std
             x[i, :feat.shape[0], :] = feat
             label = DataGenerator.text_to_int_sequence(texts[i])
             y.append(label)
@@ -133,10 +144,11 @@ class DataGenerator(object):
 
     def iterate(self, audio_paths, texts, minibatch_size,
                 max_iters=None):
-        k_iters = int(np.ceil(len(audio_paths) / minibatch_size))
-        logger.info("Iters: {}".format(k_iters))
         if max_iters is not None:
             k_iters = max_iters
+        else:
+            k_iters = int(np.ceil(len(audio_paths) / minibatch_size))
+        logger.info("Iters: {}".format(k_iters))
         pool = ThreadPoolExecutor(1)  # Run a single I/O thread in parallel
         future = pool.submit(self.prepare_minibatch,
                              audio_paths[:minibatch_size],
@@ -156,7 +168,7 @@ class DataGenerator(object):
         minibatch = future.result()
         yield minibatch
 
-    def iterate_train(self, minibatch_size=32, sort_by_duration=False,
+    def iterate_train(self, minibatch_size=16, sort_by_duration=False,
                       shuffle=True):
         if sort_by_duration and shuffle:
             shuffle = False
@@ -174,11 +186,11 @@ class DataGenerator(object):
                 DataGenerator.sort_by_duration(durations, audio_paths, texts)
         return self.iterate(audio_paths, texts, minibatch_size)
 
-    def iterate_test(self, minibatch_size=32):
+    def iterate_test(self, minibatch_size=16):
         return self.iterate(self.test_audio_paths, self.test_texts,
                             minibatch_size)
 
-    def iterate_validation(self, minibatch_size=32):
+    def iterate_validation(self, minibatch_size=16):
         return self.iterate(self.val_audio_paths, self.val_texts,
                             minibatch_size)
 
@@ -189,7 +201,7 @@ class DataGenerator(object):
         """
         k_samples = min(k_samples, len(self.train_audio_paths))
         samples = self.rng.sample(self.train_audio_paths, k_samples)
-        feats = map(self.featurize, samples)
+        feats = [self.featurize(s) for s in samples]
         feats = np.vstack(feats)
         self.feats_mean = np.mean(feats, axis=0)
         self.feats_std = np.std(feats, axis=0)

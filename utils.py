@@ -34,7 +34,7 @@ def conv_output_length(input_length, filter_size, border_mode, stride,
     return (output_length + stride - 1) // stride
 
 
-def specgram_real(samples, fft_length=256, sample_rate=2, hop_length=128):
+def spectrogram(samples, fft_length=256, sample_rate=2, hop_length=128):
     """
     Compute the spectrogram for a real signal.
     The parameters follow the naming convention of
@@ -92,7 +92,7 @@ def specgram_real(samples, fft_length=256, sample_rate=2, hop_length=128):
 
 def spectrogram_from_file(filename, step=10, window=20, max_freq=None,
                           eps=1e-14):
-    """ Calculate the linear spectrogram from FFT energy
+    """ Calculate the log of linear spectrogram from FFT energy
     Params:
         filename (str): Path to the audio file
         step (int): Step size in milliseconds between windows
@@ -113,7 +113,7 @@ def spectrogram_from_file(filename, step=10, window=20, max_freq=None,
             raise ValueError("step size must not be greater than window size")
         hop_length = int(0.001 * step * sample_rate)
         fft_length = int(0.001 * window * sample_rate)
-        pxx, freqs = specgram_real(
+        pxx, freqs = spectrogram(
             audio, fft_length=fft_length, sample_rate=sample_rate,
             hop_length=hop_length)
         ind = np.where(freqs <= max_freq)[0][-1] + 1

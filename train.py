@@ -29,6 +29,9 @@ def validation(model, val_fn, datagen, mb_size=16):
         labels = batch['y']
         input_lengths = batch['input_lengths']
         label_lengths = batch['label_lengths']
+        # Due to convolution, the number of timesteps of the output
+        # is different from the input length. Calculate the resulting
+        # timesteps
         output_lengths = [model.conv_output_length(l)
                           for l in input_lengths]
         _, ctc_cost = val_fn([inputs, output_lengths, labels,
@@ -54,14 +57,18 @@ def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=16):
     train_costs, val_costs = [], []
     iters = 0
     for e in range(epochs):
+        shuffle = e != 0
         sortagrad = e == 0
         for i, batch in \
-                enumerate(datagen.iterate_train(mb_size,
+                enumerate(datagen.iterate_train(mb_size, shuffle=shuffle,
                                                 sort_by_duration=sortagrad)):
             inputs = batch['x']
             labels = batch['y']
             input_lengths = batch['input_lengths']
             label_lengths = batch['label_lengths']
+            # Due to convolution, the number of timesteps of the output
+            # is different from the input length. Calculate the resulting
+            # timesteps
             output_lengths = [model.conv_output_length(l)
                               for l in input_lengths]
             _, ctc_cost = train_fn([inputs, output_lengths, labels,
@@ -90,10 +97,14 @@ def main(desc_file, epochs, save_dir):
 
     # Prepare the data generator
     datagen = DataGenerator()
+    # Load the JSON file that contains the dataset
     datagen.load_metadata_from_desc_file(args.desc_file)
-    datagen.fit_train(6)
+    # Use a few samples from the dataset, to calculate the means and variance
+    # of the features, so that we can center our inputs to the network
+    datagen.fit_train(100)
 
-    # Compile a model
+    # Compile a Recurrent Network with 1 1D convolution layer, GRU units
+    # and 1 fully connected layer
     model = compile_gru_model(recur_layers=3, nodes=1000, batch_norm=True)
 
     # Compile the CTC training function

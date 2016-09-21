@@ -43,7 +43,8 @@ def validation(model, val_fn, datagen, mb_size=16):
     return avg_cost / i
 
 
-def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=16):
+def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=16,
+          do_sortagrad=True):
     """ Main training routine for speech-models
     Params:
         model (keras.model): Constructed keras model
@@ -55,12 +56,15 @@ def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=16):
         save_dir (str): Path where model and costs are saved
         epochs (int): Total epochs to continue training
         mb_size (int): Size of each minibatch
+        do_sortagrad (bool): If true, we sort utterances by their length in the
+            first epoch
     """
     train_costs, val_costs = [], []
     iters = 0
     for e in range(epochs):
-        shuffle = e != 0
-        sortagrad = e == 0
+        if do_sortagrad:
+            shuffle = e != 0
+            sortagrad = e == 0
         for i, batch in \
                 enumerate(datagen.iterate_train(mb_size, shuffle=shuffle,
                                                 sort_by_duration=sortagrad)):
@@ -91,7 +95,7 @@ def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=16):
             save_model(save_dir, model, train_costs, val_costs, iters)
 
 
-def main(train_desc_file, val_desc_file, epochs, save_dir):
+def main(train_desc_file, val_desc_file, epochs, save_dir, sortagrad):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     # Configure logging
@@ -117,7 +121,7 @@ def main(train_desc_file, val_desc_file, epochs, save_dir):
     val_fn = compile_test_fn(model)
 
     # Train the model
-    train(model, train_fn, val_fn, datagen, save_dir)
+    train(model, train_fn, val_fn, datagen, save_dir, sortagrad)
 
 
 if __name__ == '__main__':
@@ -133,6 +137,10 @@ if __name__ == '__main__':
                              'created if it doesn\'t already exist')
     parser.add_argument('--epochs', type=int, default=10,
                         help='Number of epochs to train the model')
+    parser.add_argument('--sortagrad', type=bool, default=True,
+                        help='If true, we sort utterances by their length in '
+                             'the first epoch')
     args = parser.parse_args()
 
-    main(args.train_desc_file, args.val_desc_file, args.epochs, args.save_dir)
+    main(args.train_desc_file, args.val_desc_file, args.epochs, args.save_dir,
+         args.sortagrad)

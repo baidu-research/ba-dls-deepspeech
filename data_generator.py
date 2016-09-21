@@ -44,14 +44,16 @@ class DataGenerator(object):
             audio_clip, step=self.step, window=self.window,
             max_freq=self.max_freq)
 
-    def load_metadata_from_desc_file(self, desc_file, test_val_split=0.1):
+    def load_metadata_from_desc_file(self, desc_file, partition='train',
+                                     max_duration=10.0,):
         """ Read metadata from the description file
             (possibly takes long, depending on the filesize)
         Params:
             desc_file (str):  Path to a JSON-line file that contains labels and
                 paths to the audio files
-            test_val_split (float): Ratio of data to be used for testing and
-                validation (between 0 and 1).
+            partition (str): One of 'train', 'validation' or 'test'
+            max_duration (float): In seconds, the maximum duration of
+                utterances to train or test on
         """
         logger.info('Reading description file: {}'.format(desc_file))
         audio_paths, durations, texts = [], [], []
@@ -59,8 +61,10 @@ class DataGenerator(object):
             for line_num, json_line in enumerate(json_line_file):
                 try:
                     spec = json.loads(json_line)
+                    if float(spec['duration']) > max_duration:
+                        continue
                     audio_paths.append(spec['key'])
-                    durations.append(spec['duration'])
+                    durations.append(float(spec['duration']))
                     texts.append(spec['text'])
                 except Exception as e:
                     # Change to (KeyError, ValueError) or
@@ -69,19 +73,31 @@ class DataGenerator(object):
                     logger.warn('Error reading line #{}: {}'
                                 .format(line_num, json_line))
                     logger.warn(str(e))
-        k_train = int(len(texts) * (1 - 2 * test_val_split))
-        self.train_audio_paths = audio_paths[:k_train]
-        self.train_durations = durations[:k_train]
-        self.train_texts = texts[:k_train]
 
-        k_val_test = int(len(texts) * test_val_split)
-        self.val_audio_paths = audio_paths[k_train: k_train + k_val_test]
-        self.val_durations = durations[k_train: k_train + k_val_test]
-        self.val_texts = texts[k_train: k_train + k_val_test]
+        if partition == 'train':
+            self.train_audio_paths = audio_paths
+            self.train_durations = durations
+            self.train_texts = texts
+        elif partition == 'validation':
+            self.val_audio_paths = audio_paths
+            self.val_durations = durations
+            self.val_texts = texts
+        elif partition == 'test':
+            self.test_audio_paths = audio_paths
+            self.test_durations = durations
+            self.test_texts = texts
+        else:
+            raise Exception("Invalid partition to load metadata. "
+                            "Must be train/validation/test")
 
-        self.test_audio_paths = audio_paths[k_train + k_val_test:]
-        self.test_durations = durations[k_train + k_val_test:]
-        self.test_texts = texts[k_train + k_val_test:]
+    def load_train_data(self, desc_file):
+        self.load_metadata_from_desc_file(desc_file, 'train')
+
+    def load_test_data(self, desc_file):
+        self.load_metadata_from_desc_file(desc_file, 'test')
+
+    def load_validation_data(self, desc_file):
+        self.load_metadata_from_desc_file(desc_file, 'validation')
 
     @staticmethod
     def sort_by_duration(durations, audio_paths, texts):

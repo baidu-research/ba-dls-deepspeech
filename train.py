@@ -38,6 +38,8 @@ def validation(model, val_fn, datagen, mb_size=16):
                               label_lengths, True])
         avg_cost += ctc_cost
         i += 1
+    if i == 0:
+        return 0.0
     return avg_cost / i
 
 
@@ -89,7 +91,7 @@ def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=16):
             save_model(save_dir, model, train_costs, val_costs)
 
 
-def main(desc_file, epochs, save_dir):
+def main(train_desc_file, val_desc_file, epochs, save_dir):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     # Configure logging
@@ -98,7 +100,8 @@ def main(desc_file, epochs, save_dir):
     # Prepare the data generator
     datagen = DataGenerator()
     # Load the JSON file that contains the dataset
-    datagen.load_metadata_from_desc_file(args.desc_file)
+    datagen.load_train(train_desc_file)
+    datagen.load_validation(val_desc_file)
     # Use a few samples from the dataset, to calculate the means and variance
     # of the features, so that we can center our inputs to the network
     datagen.fit_train(100)
@@ -119,9 +122,12 @@ def main(desc_file, epochs, save_dir):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('desc_file', type=str,
+    parser.add_argument('train_desc_file', type=str,
                         help='Path to a JSON-line file that contains '
-                             'labels and paths to the audio files. ')
+                             'training labels and paths to the audio files.')
+    parser.add_argument('val_desc_file', type=str,
+                        help='Path to a JSON-line file that contains '
+                             'validation labels and paths to the audio files.')
     parser.add_argument('save_dir', type=str,
                         help='Directory to store the model. This will be '
                              'created if it doesn\'t already exist')
@@ -129,4 +135,4 @@ if __name__ == '__main__':
                         help='Number of epochs to train the model')
     args = parser.parse_args()
 
-    main(args.desc_file, args.epochs, args.save_dir)
+    main(args.train_desc_file, args.val_desc_file, args.epochs, args.save_dir)

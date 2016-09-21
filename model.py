@@ -79,7 +79,7 @@ def compile_gru_model(input_dim=161, output_dim=29, recur_layers=3, nodes=1024,
                             subsample_length=conv_stride, init=initialization,
                             activation='relu')(acoustic_input)
     if batch_norm:
-        output = BatchNormalization(name='bn_conv_1d')(conv_1d)
+        output = BatchNormalization(name='bn_conv_1d', mode=2)(conv_1d)
     else:
         output = conv_1d
 
@@ -88,7 +88,8 @@ def compile_gru_model(input_dim=161, output_dim=29, recur_layers=3, nodes=1024,
                      name='rnn_{}'.format(r + 1), init=initialization,
                      return_sequences=True)(output)
         if batch_norm:
-            bn_layer = BatchNormalization(name='bn_rnn_{}'.format(r + 1))
+            bn_layer = BatchNormalization(name='bn_rnn_{}'.format(r + 1),
+                                          mode=2)
             output = bn_layer(output)
 
     # We don't softmax here because CTC does that

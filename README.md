@@ -45,9 +45,9 @@ We make use of a JSON file that aggregates all data for training, validation and
 {"duration": 15.685, "text": "spoken text label", "key": "/home/username/LibriSpeech/train-clean-360/5672/88367/5672-88367-0031.wav"}
 {"duration": 14.32, "text": "ground truth text", "key": "/home/username/LibriSpeech/train-other-500/8678/280914/8678-280914-0009.wav"}
 </pre>  
-Each line is a JSON. We will make use of the durations to construct a curriculum in the first epoch (shorter utterances are easier).  
-You can query the duration of a file using: <code>soxi -D filename</code>. By default, we split this data as 80%: training, 10%: validation and 10%: testing. You can play around with these in `data_generator.py`  
+You can create such a file using `create_desc_file.py`. Each line is a JSON. We will make use of the durations to construct a curriculum in the first epoch (shorter utterances are easier).  
+You can query the duration of a file using: <code>soxi -D filename</code>.
 ## Running an example
 Finally, let's train a model!  
-<code>python train.py corpus.json ./save_my_model_here</code>  
+<code>python train.py train_corpus.json validation_corpus.json ./save_my_model_here</code>  
 This will checkpoint a model every few iterations into the directory you specify.

@@ -7,8 +7,7 @@ import random
 
 from concurrent.futures import ThreadPoolExecutor, wait
 
-from char_map import char_map
-from utils import calc_feat_dim, spectrogram_from_file
+from utils import calc_feat_dim, spectrogram_from_file, text_to_int_sequence
 
 RNG_SEED = 123
 logger = logging.getLogger(__name__)
@@ -91,18 +90,6 @@ class DataGenerator(object):
     def normalize(self, feature, eps=1e-14):
         return (feature - self.feats_mean) / (self.feats_std + eps)
 
-    @staticmethod
-    def text_to_int_sequence(text):
-        """ Use a character map and convert text to an integer sequence """
-        int_sequence = []
-        for c in text:
-            if c == ' ':
-                ch = char_map['<SPACE>']
-            else:
-                ch = char_map[c]
-            int_sequence.append(ch)
-        return int_sequence
-
     def prepare_minibatch(self, audio_paths, texts):
         """ Featurize a minibatch of audio, zero pad them and return a dictionary
         Params:
@@ -129,7 +116,7 @@ class DataGenerator(object):
             feat = features[i]
             feat = self.normalize(feat)  # Center using means and std
             x[i, :feat.shape[0], :] = feat
-            label = DataGenerator.text_to_int_sequence(texts[i])
+            label = text_to_int_sequence(texts[i])
             y.append(label)
             label_lengths.append(len(label))
         # Flatten labels to comply with warp-CTC signature

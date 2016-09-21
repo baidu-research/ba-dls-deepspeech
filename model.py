@@ -41,8 +41,8 @@ def compile_train_fn(model, learning_rate=1e-6):
     return train_fn
 
 
-def compile_val_fn(model):
-    """ Build a validation routine for speech models.
+def compile_test_fn(model):
+    """ Build a testing routine for speech models.
     Args:
         model: A keras model (built=True) instance
     Returns:

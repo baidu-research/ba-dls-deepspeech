@@ -2,7 +2,10 @@ import logging
 import os
 import numpy as np
 import soundfile
+from keras.models import model_from_json
 from numpy.lib.stride_tricks import as_strided
+
+from char_map import char_map, index_map
 
 logger = logging.getLogger(__name__)
 
@@ -137,6 +140,55 @@ def save_model(save_dir, model, train_costs, validation_costs):
     model.save_weights(model_weights_file, overwrite=True)
     np.savez(os.path.join(save_dir, 'costs.npz'), train=train_costs,
              validation=validation_costs)
+
+
+def load_model(load_dir):
+    """ Load a model and its weights from a directory
+    Params:
+        load_dir (str): Path the model directory
+    Returns:
+        model (keras.models.Model)
+    """
+    model_config_file = os.path.join(load_dir, 'model_config.json')
+    model_config = open(model_config_file).read()
+    model = model_from_json(model_config)
+    model_weights_file = os.path.join(load_dir, 'model_weights.h5')
+    model.load_weights(model_weights_file)
+    return model
+
+
+def argmax_decode(prediction):
+    """ Decode a prediction using the highest probable character at each
+        timestep. Then, simply convert the integer sequence to text
+    Params:
+        prediction (np.array): timestep * num_characters
+    """
+    int_sequence = []
+    for timestep in prediction:
+        int_sequence.append(np.argmax(timestep))
+    tokens = []
+    c_prev = -1
+    for c in int_sequence:
+        if c == c_prev:
+            continue
+        if c != 0:  # Blank
+            tokens.append(c)
+        c_prev = c
+
+    text = ''.join([index_map[i] for i in tokens])
+    return text
+
+
+def text_to_int_sequence(text):
+    """ Use a character map and convert text to an integer sequence """
+    int_sequence = []
+    for c in text:
+        if c == ' ':
+            ch = char_map['<SPACE>']
+        else:
+            ch = char_map[c]
+        int_sequence.append(ch)
+    return int_sequence
 
 
 def configure_logging(console_log_level=logging.INFO,

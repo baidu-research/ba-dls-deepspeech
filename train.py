@@ -5,7 +5,7 @@ import logging
 import os
 
 from data_generator import DataGenerator
-from model import compile_gru_model, compile_train_fn, compile_val_fn
+from model import compile_gru_model, compile_train_fn, compile_test_fn
 from utils import configure_logging, save_model
 
 logger = logging.getLogger(__name__)
@@ -111,7 +111,7 @@ def main(desc_file, epochs, save_dir):
     train_fn = compile_train_fn(model)
 
     # Compile the validation function
-    val_fn = compile_val_fn(model)
+    val_fn = compile_test_fn(model)
 
     # Train the model
     train(model, train_fn, val_fn, datagen, save_dir)

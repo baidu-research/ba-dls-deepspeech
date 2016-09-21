@@ -34,3 +34,4 @@ for line in char_map_str.strip().split('\n'):
     ch, index = line.split()
     char_map[ch] = int(index)
     index_map[int(index)] = ch
+index_map[2] = ' '

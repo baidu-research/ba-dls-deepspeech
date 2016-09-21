@@ -121,7 +121,8 @@ def main(train_desc_file, val_desc_file, epochs, save_dir, sortagrad):
     val_fn = compile_test_fn(model)
 
     # Train the model
-    train(model, train_fn, val_fn, datagen, save_dir, sortagrad)
+    train(model, train_fn, val_fn, datagen, save_dir, epochs=epochs,
+          do_sortagrad=sortagrad)
 
 
 if __name__ == '__main__':

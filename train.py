@@ -65,6 +65,9 @@ def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=16,
         if do_sortagrad:
             shuffle = e != 0
             sortagrad = e == 0
+        else:
+            shuffle = True
+            sortagrad = False
         for i, batch in \
                 enumerate(datagen.iterate_train(mb_size, shuffle=shuffle,
                                                 sort_by_duration=sortagrad)):

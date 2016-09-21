@@ -123,20 +123,26 @@ def spectrogram_from_file(filename, step=10, window=20, max_freq=None,
     return np.transpose(np.log(pxx[:ind, :] + eps))
 
 
-def save_model(save_dir, model, train_costs, validation_costs):
+def save_model(save_dir, model, train_costs, validation_costs, index=None):
     """ Save the model and costs into a directory
     Params:
         save_dir (str): Directory used to store the model
         model (keras.models.Model)
         train_costs (list(float))
         validation_costs (list(float))
+        index (int): If this is provided, add this index as a suffix to
+            the weights (useful for checkpointing during training)
     """
     logger.info("Checkpointing model to: {}".format(save_dir))
     model_config_path = os.path.join(save_dir, 'model_config.json')
     with open(model_config_path, 'w') as model_config_file:
         model_json = model.to_json()
         model_config_file.write(model_json)
-    model_weights_file = os.path.join(save_dir, 'model_weights.h5')
+    if index is None:
+        weights_format = 'model_weights.h5'
+    else:
+        weights_format = 'model_{}_weights.h5'.format(index)
+    model_weights_file = os.path.join(save_dir, weights_format)
     model.save_weights(model_weights_file, overwrite=True)
     np.savez(os.path.join(save_dir, 'costs.npz'), train=train_costs,
              validation=validation_costs)

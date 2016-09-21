@@ -55,7 +55,8 @@ class DataGenerator(object):
             max_duration (float): In seconds, the maximum duration of
                 utterances to train or test on
         """
-        logger.info('Reading description file: {}'.format(desc_file))
+        logger.info('Reading description file: {} for partition: {}'
+                    .format(desc_file, partition))
         audio_paths, durations, texts = [], [], []
         with open(desc_file) as json_line_file:
             for line_num, json_line in enumerate(json_line_file):

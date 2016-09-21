@@ -51,7 +51,7 @@ def main(desc_file, load_dir):
     # Prepare the data generator
     datagen = DataGenerator()
     # Load the JSON file that contains the dataset
-    datagen.load_metadata_from_desc_file(args.desc_file)
+    datagen.load_test_data(args.desc_file)
     # Use a few samples from the dataset, to calculate the means and variance
     # of the features, so that we can center our inputs to the network
     datagen.fit_train(100)
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('desc_file', type=str,
                         help='Path to a JSON-line file that contains '
-                             'labels and paths to the audio files. ')
+                             'test labels and paths to the audio files. ')
     parser.add_argument('load_dir', type=str,
                         help='Directory where a trained model is stored.')
     args = parser.parse_args()

@@ -83,12 +83,12 @@ def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=16):
             if iters % 500 == 0:
                 val_cost = validation(model, val_fn, datagen, mb_size)
                 val_costs.append(val_cost)
-                save_model(save_dir, model, train_costs, val_costs)
+                save_model(save_dir, model, train_costs, val_costs, iters)
         if iters % 500 != 0:
             # End of an epoch. Check validation cost and save costs
             val_cost = validation(model, val_fn, datagen, mb_size)
             val_costs.append(val_cost)
-            save_model(save_dir, model, train_costs, val_costs)
+            save_model(save_dir, model, train_costs, val_costs, iters)
 
 
 def main(train_desc_file, val_desc_file, epochs, save_dir):
@@ -100,8 +100,8 @@ def main(train_desc_file, val_desc_file, epochs, save_dir):
     # Prepare the data generator
     datagen = DataGenerator()
     # Load the JSON file that contains the dataset
-    datagen.load_train(train_desc_file)
-    datagen.load_validation(val_desc_file)
+    datagen.load_train_data(train_desc_file)
+    datagen.load_validation_data(val_desc_file)
     # Use a few samples from the dataset, to calculate the means and variance
     # of the features, so that we can center our inputs to the network
     datagen.fit_train(100)

@@ -47,7 +47,7 @@ def test(model, test_fn, datagen, mb_size=16, conv_context=11,
     return avg_cost / i
 
 
-def main(desc_file, load_dir):
+def main(test_desc_file, train_desc_file, load_dir):
     # Prepare the data generator
     datagen = DataGenerator()
     # Load the JSON file that contains the dataset
@@ -70,10 +70,13 @@ def main(desc_file, load_dir):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('desc_file', type=str,
+    parser.add_argument('test_desc_file', type=str,
                         help='Path to a JSON-line file that contains '
                              'test labels and paths to the audio files. ')
+    parser.add_argument('train_desc_file', type=str,
+                        help='Path to the training JSON-line file. This will '
+                             'be used to extract feature means/variance')
     parser.add_argument('load_dir', type=str,
                         help='Directory where a trained model is stored.')
     args = parser.parse_args()
-    main(args.desc_file, args.load_dir)
+    main(args.test_desc_file, args.train_desc_file, args.load_dir)

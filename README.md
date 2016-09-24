@@ -11,17 +11,21 @@ You will need the following packages installed before you can train a model usin
 of your new packages.  
   
 1. **theano**  
-The underlying deep learning Python library. We suggest using the bleeding edge version through  
-<code>git clone https://github.com/Theano/Theano</code>  
-Follow the instructions on: http://deeplearning.net/software/theano/install.html#bleeding-edge-install-instructions  
-Or, simply: <code>cd Theano; python setup.py install</code>
+The underlying deep learning Python library. We suggest downloading the latest release from https://github.com/Theano/Theano/releases.    
+```bash
+$tar xf <downloaded_tar_file>
+$cd theano-*
+$python setup.py install --user
+```  
 
 2. **keras**  
-This is a wrapper over Theano that provides nice functions for building networks. Once again, we suggest using the bleeding edge version.
+This is a wrapper over Theano that provides nice functions for building networks. Download the latest release from https://github.com/fchollet/keras/releases  
 Make sure you install it with support for `hdf5` - we make use of that to save models.  
-<code>git clone https://github.com/fchollet/keras</code>  
-Follow the installation instructions on https://github.com/fchollet/keras  
-Or, simply: <code>cd keras; python setup.py install</code>
+```bash
+$tar xf <downloaded_tar_file>
+$cd keras-*
+$python setup.py install --user
+```
 
 3. **warp-ctc**  
 This contains the main implementation of the CTC cost function.  

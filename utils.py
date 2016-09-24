@@ -1,6 +1,8 @@
+import glob
 import logging
 import os
 import numpy as np
+import re
 import soundfile
 from keras.models import model_from_json
 from numpy.lib.stride_tricks import as_strided
@@ -107,6 +109,8 @@ def spectrogram_from_file(filename, step=10, window=20, max_freq=None,
     with soundfile.SoundFile(filename) as sound_file:
         audio = sound_file.read(dtype='float32')
         sample_rate = sound_file.samplerate
+        if audio.ndim >= 2:
+            audio = np.mean(audio, 1)
         if max_freq is None:
             max_freq = sample_rate / 2
         if max_freq > sample_rate / 2:
@@ -148,17 +152,34 @@ def save_model(save_dir, model, train_costs, validation_costs, index=None):
              validation=validation_costs)
 
 
-def load_model(load_dir):
+def load_model(load_dir, weights_file=None):
     """ Load a model and its weights from a directory
     Params:
         load_dir (str): Path the model directory
+        weights_file (str): If this is not passed in, try to load the latest
+            model_*weights.h5 file in the directory
     Returns:
         model (keras.models.Model)
     """
+    def atoi(text):
+        return int(text) if text.isdigit() else text
+
+    def natural_keys(text):
+        # From http://stackoverflow.com/questions/5967500
+        return [atoi(c) for c in re.split('(\d+)', text)]
+
     model_config_file = os.path.join(load_dir, 'model_config.json')
     model_config = open(model_config_file).read()
     model = model_from_json(model_config)
-    model_weights_file = os.path.join(load_dir, 'model_weights.h5')
+
+    if weights_file is None:
+        # This will find all files of name model_*weights.h5
+        # We try to use the latest one saved
+        weights_files = glob.glob(os.path.join(load_dir, 'model_*weights.h5'))
+        weights_files.sort(key=natural_keys)
+        model_weights_file = weights_files[-1]  # Use the latest model
+    else:
+        model_weights_file = weights_file
     model.load_weights(model_weights_file)
     return model
 

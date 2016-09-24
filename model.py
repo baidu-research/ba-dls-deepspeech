@@ -5,14 +5,15 @@ import keras.backend as K
 from keras.layers import (BatchNormalization, Convolution1D, Dense,
                           Input, GRU, TimeDistributed)
 from keras.models import Model
-from keras.optimizers import SGD
+# from keras.optimizers import SGD
+import lasagne
 
 from utils import conv_output_length
 
 logger = logging.getLogger(__name__)
 
 
-def compile_train_fn(model, learning_rate=1e-6):
+def compile_train_fn(model, learning_rate=2e-4):
     """ Build the CTC training routine for speech models.
     Args:
         model: A keras model (built=True) instance
@@ -31,9 +32,14 @@ def compile_train_fn(model, learning_rate=1e-6):
     ctc_cost = ctc.cpu_ctc_th(network_output, output_lens,
                               label, label_lens).mean()
     trainable_vars = model.trainable_weights
-    optimizer = SGD(nesterov=True, lr=learning_rate, momentum=0.9,
-                    clipnorm=100)
-    updates = optimizer.get_updates(trainable_vars, [], ctc_cost)
+    # optimizer = SGD(nesterov=True, lr=learning_rate, momentum=0.9,
+    #                 clipnorm=100)
+    # updates = optimizer.get_updates(trainable_vars, [], ctc_cost)
+    trainable_vars = model.trainable_weights
+    grads = K.gradients(ctc_cost, trainable_vars)
+    grads = lasagne.updates.total_norm_constraint(grads, 100)
+    updates = lasagne.updates.nesterov_momentum(grads, trainable_vars,
+                                                learning_rate, 0.99)
     train_fn = K.function([acoustic_input, output_lens, label, label_lens,
                            K.learning_phase()],
                           [network_output, ctc_cost],
@@ -63,6 +69,24 @@ def compile_test_fn(model):
                         K.learning_phase()],
                         [network_output, ctc_cost])
     return val_fn
+
+
+def compile_output_fn(model):
+    """ Build a function that simply calculates the output of a model
+    Args:
+        model: A keras model (built=True) instance
+    Returns:
+        output_fn (theano.function): Function that takes in acoustic inputs,
+            and returns network outputs
+    """
+    logger.info("Building val_fn")
+    acoustic_input = model.inputs[0]
+    network_output = model.outputs[0]
+    network_output = network_output.dimshuffle((1, 0, 2))
+
+    output_fn = K.function([acoustic_input, K.learning_phase()],
+                           [network_output])
+    return output_fn
 
 
 def compile_gru_model(input_dim=161, output_dim=29, recur_layers=3, nodes=1024,

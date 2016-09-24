@@ -139,7 +139,7 @@ if __name__ == '__main__':
     parser.add_argument('save_dir', type=str,
                         help='Directory to store the model. This will be '
                              'created if it doesn\'t already exist')
-    parser.add_argument('--epochs', type=int, default=10,
+    parser.add_argument('--epochs', type=int, default=20,
                         help='Number of epochs to train the model')
     parser.add_argument('--sortagrad', type=bool, default=True,
                         help='If true, we sort utterances by their length in '

@@ -54,7 +54,7 @@ def graph(dirs, save_file, average_window=100):
             train_costs = np.convolve(train_costs, average_filter,
                                       mode='valid')
         ax.plot(train_costs, color=color, label=name + '_train', lw=1.5)
-        ax.plot(valid_range, valid_costs,
+        ax.plot(valid_range, valid_costs[:len(valid_range)],
                 '-o', color=color, label=name + '_valid')
     ax.grid(True)
     ax.legend(loc='best')

@@ -51,7 +51,8 @@ def main(test_desc_file, train_desc_file, load_dir):
     # Prepare the data generator
     datagen = DataGenerator()
     # Load the JSON file that contains the dataset
-    datagen.load_test_data(args.desc_file)
+    datagen.load_test_data(test_desc_file)
+    datagen.load_train_data(train_desc_file)
     # Use a few samples from the dataset, to calculate the means and variance
     # of the features, so that we can center our inputs to the network
     datagen.fit_train(100)

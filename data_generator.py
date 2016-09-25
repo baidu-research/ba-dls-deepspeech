@@ -1,3 +1,8 @@
+"""
+Defines a class that is used to featurize audio clips, and provide
+them to the network for training or testing.
+"""
+
 from __future__ import absolute_import, division, print_function
 
 import json

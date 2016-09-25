@@ -1,3 +1,8 @@
+"""
+Define functions used to construct a multilayer GRU CTC model, and
+functions for training and testing it.
+"""
+
 import ctc
 import logging
 import keras.backend as K

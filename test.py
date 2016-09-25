@@ -1,3 +1,7 @@
+"""
+Test a trained speech model over a dataset
+"""
+
 from __future__ import absolute_import, division, print_function
 import argparse
 import numpy as np
@@ -9,11 +13,11 @@ from utils import argmax_decode, conv_output_length, load_model
 
 def test(model, test_fn, datagen, mb_size=16, conv_context=11,
          conv_border_mode='valid', conv_stride=2):
-    """ Validation routine for speech-models
+    """ Testing routine for speech-models
     Params:
         model (keras.model): Constructed keras model
         test_fn (theano.function): A theano function that calculates the cost
-            over a validation set
+            over a test set
         datagen (DataGenerator)
         mb_size (int): Size of each minibatch
         conv_context (int): Convolution context

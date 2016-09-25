@@ -1,3 +1,9 @@
+r"""
+Use this script to visualize the output of a trained speech-model.
+Usage: python visualize.py /path/to/audio /path/to/training/json.json \
+            /path/to/model
+"""
+
 from __future__ import absolute_import, division, print_function
 import argparse
 import matplotlib
@@ -15,6 +21,13 @@ def softmax(x):
 
 
 def visualize(model, test_file, train_desc_file):
+    """ Get the prediction using the model, and visualize softmax outputs
+    Params:
+        model (keras.models.Model): Trained speech model
+        test_file (str): Path to an audio clip
+        train_desc_file(str): Path to the training file used to train this
+                              model
+    """
     datagen = DataGenerator()
     datagen.load_train_data(train_desc_file)
     datagen.fit_train(100)

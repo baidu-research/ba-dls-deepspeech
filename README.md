@@ -1,5 +1,5 @@
 # ba-dls-deepspeech
-Train your own CTC model!
+Train your own CTC model!  This code was released with the lecture from the [Bay Area DL School](http://www.bayareadlschool.org/).  PDF slides are available [here](http://cs.stanford.edu/~acoates/ba_dls_speech2016.pdf).
 
 # Table of Contents
 1. [Dependencies](#dependencies)

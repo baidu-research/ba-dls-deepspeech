@@ -10,7 +10,7 @@ Train your own CTC model!
 You will need the following packages installed before you can train a model using this code. You may have to change `PYTHONPATH` to include the directories
 of your new packages.  
   
-1. **theano**  
+**theano**  
 The underlying deep learning Python library. We suggest downloading the latest release from https://github.com/Theano/Theano/releases.    
 ```bash
 $tar xf <downloaded_tar_file>
@@ -18,26 +18,31 @@ $cd theano-*
 $python setup.py install --user
 ```  
 
-2. **keras**  
+**keras**  
 This is a wrapper over Theano that provides nice functions for building networks. Download the latest release from https://github.com/fchollet/keras/releases  
 Make sure you install it with support for `hdf5` - we make use of that to save models.  
 ```bash
 $tar xf <downloaded_tar_file>
 $cd keras-*
 $python setup.py install --user
+```  
+
+**lasagne**  
+```
+$pip install lasagne <--user>
 ```
 
-3. **warp-ctc**  
+**warp-ctc**  
 This contains the main implementation of the CTC cost function.  
 <code>git clone https://github.com/baidu-research/warp-ctc</code>  
 To install it, follow the instructions on https://github.com/baidu-research/warp-ctc
 
-4. **theano-warp-ctc**  
+**theano-warp-ctc**  
 This is a theano wrapper over warp-ctc.  
 <code>git clone https://github.com/sherjilozair/ctc</code>  
 Follow the instructions on https://github.com/sherjilozair/ctc for installation.
 
-5. **Others**  
+**Others**  
 You may require some additional packages. Install Python requirements through `pip` as:  
 <code>pip install soundfile</code>  
 On Ubuntu, `avconv` (used here for audio format conversions) requires `libav-tools`.  

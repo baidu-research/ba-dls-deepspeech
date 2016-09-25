@@ -48,15 +48,38 @@ You may require some additional packages. Install Python requirements through `p
 On Ubuntu, `avconv` (used here for audio format conversions) requires `libav-tools`.  
 <code>sudo apt-get install libav-tools</code>  
 ## Data
-We will make use of the LibriSpeech ASR corpus to train our models. Use the `download.sh` script to download this corpus (~65GB). Use `flac_to_wav.sh` to convert any `flac` files to `wav`.  
+We will make use of the LibriSpeech ASR corpus to train our models. While you can start off by using the 'clean' LibriSpeech datasets, you can use the `download.sh` script to download the entire corpus (~65GB).  Use `flac_to_wav.sh` to convert any `flac` files to `wav`.  
 We make use of a JSON file that aggregates all data for training, validation and testing. Once you have a corpus, create a description file that is a json-line file in the following format:
 <pre>
 {"duration": 15.685, "text": "spoken text label", "key": "/home/username/LibriSpeech/train-clean-360/5672/88367/5672-88367-0031.wav"}
 {"duration": 14.32, "text": "ground truth text", "key": "/home/username/LibriSpeech/train-other-500/8678/280914/8678-280914-0009.wav"}
 </pre>  
-You can create such a file using `create_desc_file.py`. Each line is a JSON. We will make use of the durations to construct a curriculum in the first epoch (shorter utterances are easier).  
+You can create such a file using `create_desc_file.py`.  
+```bash
+$python create_desc_file.py /path/to/data output_file.json
+```
 You can query the duration of a file using: <code>soxi -D filename</code>.
 ## Running an example
 Finally, let's train a model!  
-<code>python train.py train_corpus.json validation_corpus.json ./save_my_model_here</code>  
-This will checkpoint a model every few iterations into the directory you specify.
+```bash
+$python train.py train_corpus.json validation_corpus.json ./model_dir
+```
+This will checkpoint a model every few iterations into the directory you specify. You can monitor how your model is doing, using `plot.py`.
+```bash
+$python plot.py -d model1_dir model2_dir -s plot.png
+```
+This will save a plot comparing two models' training and validation performance over iterations. This helps you gauge hyperparameter settings and their effects. Eg: You can change learning rate passed to `compile_train_fn` in `train.py`, and see how that affects training curves.
+Note that the model and costs are checkpointed only once in 500 iterations or once every epoch, so it may take a while before you can see updates plots.
+
+**Testing**
+Once you've trained your model for a sufficient number of iterations, you can test its performance on a different dataset:
+```bash
+$python test.py test_corpus.json train_corpus.json /path/to/trained_model
+```
+This will output the average loss over the test set, and the predictions compared to their ground truth. We make use of the training corpus here, to compute feature means and variance.
+
+You can also visualize your model's outputs for an audio clip using:
+```bash
+$python visualize.py audio_clip.wav train_corpus.json /path/to/trained_model
+```
+This outputs: `softmax.png` and `softmax.npy`. These will tell you how confident your model is about the ground truth, across all the timesteps.

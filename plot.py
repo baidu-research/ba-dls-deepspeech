@@ -1,3 +1,8 @@
+"""
+Plot training/validation curves for multiple models.
+"""
+
+
 from __future__ import division
 from __future__ import print_function
 import argparse

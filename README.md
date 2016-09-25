@@ -56,18 +56,20 @@ We make use of a JSON file that aggregates all data for training, validation and
 </pre>  
 You can create such a file using `create_desc_file.py`.  
 ```bash
-$python create_desc_file.py /path/to/data output_file.json
+$python create_desc_file.py /path/to/LibriSpeech/train-clean-100 train_corpus.json
+$python create_desc_file.py /path/to/LibriSpeech/dev-clean validation_corpus.json
+$python create_desc_file.py /path/to/LibriSpeech/test-clean test_corpus.json
 ```
 You can query the duration of a file using: <code>soxi -D filename</code>.
 ## Running an example
 **Training**  
 Finally, let's train a model!  
 ```bash
-$python train.py train_corpus.json validation_corpus.json ./model_dir
+$python train.py train_corpus.json validation_corpus.json /path/to/model
 ```
 This will checkpoint a model every few iterations into the directory you specify. You can monitor how your model is doing, using `plot.py`.
 ```bash
-$python plot.py -d model1_dir model2_dir -s plot.png
+$python plot.py -d /path/to/model1 /path/to/model2 -s plot.png
 ```
 This will save a plot comparing two models' training and validation performance over iterations. This helps you gauge hyperparameter settings and their effects. Eg: You can change learning rate passed to `compile_train_fn` in `train.py`, and see how that affects training curves.
 Note that the model and costs are checkpointed only once in 500 iterations or once every epoch, so it may take a while before you can see updates plots.
@@ -75,13 +77,13 @@ Note that the model and costs are checkpointed only once in 500 iterations or on
 **Testing**  
 Once you've trained your model for a sufficient number of iterations, you can test its performance on a different dataset:
 ```bash
-$python test.py test_corpus.json train_corpus.json /path/to/trained_model
+$python test.py test_corpus.json train_corpus.json /path/to/model
 ```
 This will output the average loss over the test set, and the predictions compared to their ground truth. We make use of the training corpus here, to compute feature means and variance.
 
 **Visualization/Debugging**  
 You can also visualize your model's outputs for an audio clip using:
 ```bash
-$python visualize.py audio_clip.wav train_corpus.json /path/to/trained_model
+$python visualize.py audio_clip.wav train_corpus.json /path/to/model
 ```
 This outputs: `softmax.png` and `softmax.npy`. These will tell you how confident your model is about the ground truth, across all the timesteps.

@@ -1,3 +1,5 @@
+# Use this script to download the entire LibriSpeech dataset
+
 #!/bin/bash
 
 base="http://www.openslr.org/resources/12/"

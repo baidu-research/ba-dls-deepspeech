@@ -60,6 +60,7 @@ $python create_desc_file.py /path/to/data output_file.json
 ```
 You can query the duration of a file using: <code>soxi -D filename</code>.
 ## Running an example
+**Training**  
 Finally, let's train a model!  
 ```bash
 $python train.py train_corpus.json validation_corpus.json ./model_dir
@@ -71,13 +72,14 @@ $python plot.py -d model1_dir model2_dir -s plot.png
 This will save a plot comparing two models' training and validation performance over iterations. This helps you gauge hyperparameter settings and their effects. Eg: You can change learning rate passed to `compile_train_fn` in `train.py`, and see how that affects training curves.
 Note that the model and costs are checkpointed only once in 500 iterations or once every epoch, so it may take a while before you can see updates plots.
 
-**Testing**
+**Testing**  
 Once you've trained your model for a sufficient number of iterations, you can test its performance on a different dataset:
 ```bash
 $python test.py test_corpus.json train_corpus.json /path/to/trained_model
 ```
 This will output the average loss over the test set, and the predictions compared to their ground truth. We make use of the training corpus here, to compute feature means and variance.
 
+**Visualization/Debugging**  
 You can also visualize your model's outputs for an audio clip using:
 ```bash
 $python visualize.py audio_clip.wav train_corpus.json /path/to/trained_model

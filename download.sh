@@ -10,7 +10,7 @@ for s in 'dev-clean' 'dev-other' 'test-clean' 'test-other' 'train-clean-100' 'tr
 do
     linkname="${base}/${s}.tar.gz"
     echo $linkname
-    wget $linkname
+    wget -c $linkname
 done
 
 for s in 'dev-clean' 'dev-other' 'test-clean' 'test-other' 'train-clean-100' 'train-clean-360' 'train-other-500'

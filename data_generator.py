@@ -4,6 +4,7 @@ them to the network for training or testing.
 """
 
 from __future__ import absolute_import, division, print_function
+from functools import reduce
 
 import json
 import logging

@@ -26,6 +26,15 @@ $tar xf <downloaded_tar_file>
 $cd keras-*
 $python setup.py install --user
 ```  
+Update the keras.json to use Theano backend:
+
+```bash
+vim ~/.keras/keras.json
+```
+Update the backend property
+```
+"backend": "theano"
+```
 
 **lasagne**  
 ```

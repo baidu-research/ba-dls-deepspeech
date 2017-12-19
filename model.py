@@ -5,11 +5,11 @@ functions for training and testing it.
 
 import ctc
 import logging
-import keras.backend as K
+import tf.keras.backend as K
 
-from keras.layers import (BatchNormalization, Convolution1D, Dense,
+from tf.keras.layers import (BatchNormalization, Conv1D, Dense,
                           Input, GRU, TimeDistributed)
-from keras.models import Model
+from tf.keras.models import Model
 # from keras.optimizers import SGD
 import lasagne
 
@@ -103,29 +103,31 @@ def compile_gru_model(input_dim=161, output_dim=29, recur_layers=3, nodes=1024,
     acoustic_input = Input(shape=(None, input_dim), name='acoustic_input')
 
     # Setup the network
-    conv_1d = Convolution1D(nodes, conv_context, name='conv1d',
-                            border_mode=conv_border_mode,
-                            subsample_length=conv_stride, init=initialization,
-                            activation='relu')(acoustic_input)
+    conv_1d = Conv1D(filters=nodes, kernel_size=conv_context, name='conv1d',
+                        padding=conv_border_mode,
+                        strides=conv_stride,
+                        kerne_initializer=initialization,
+                        activation='relu')(acoustic_input)
     if batch_norm:
-        output = BatchNormalization(name='bn_conv_1d', mode=2)(conv_1d)
+        output = BatchNormalization(name='bn_conv_1d')(conv_1d)
     else:
         output = conv_1d
 
     for r in range(recur_layers):
-        output = GRU(nodes, activation='relu',
-                     name='rnn_{}'.format(r + 1), init=initialization,
-                     return_sequences=True)(output)
+        output = GRU(units=nodes, activation='relu',
+                        name='rnn_{}'.format(r + 1),
+                        kernel_initializer=initialization,
+                        return_sequences=True)(output)
         if batch_norm:
-            bn_layer = BatchNormalization(name='bn_rnn_{}'.format(r + 1),
-                                          mode=2)
+            bn_layer = BatchNormalization(name='bn_rnn_{}'.format(r + 1))
             output = bn_layer(output)
 
     # We don't softmax here because CTC does that
     network_output = TimeDistributed(Dense(
-        output_dim, name='dense', activation='linear', init=initialization,
+        units=output_dim, name='dense', activation='linear',
+        kernel_initializer=initialization,
     ))(output)
-    model = Model(input=acoustic_input, output=network_output)
+    model = Model(inputs=acoustic_input, outputs=network_output)
     model.conv_output_length = lambda x: conv_output_length(
         x, conv_context, conv_border_mode, conv_stride)
     return model

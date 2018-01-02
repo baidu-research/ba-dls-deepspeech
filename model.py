@@ -5,11 +5,12 @@ functions for training and testing it.
 
 import ctc
 import logging
-import tf.keras.backend as K
+from tensorflow.python import keras
+import tensorflow.python.keras.backend as K
 
-from tf.keras.layers import (BatchNormalization, Conv1D, Dense,
+from tensorflow.python.keras.layers import (BatchNormalization, Conv1D, Dense,
                           Input, GRU, TimeDistributed)
-from tf.keras.models import Model
+from tensorflow.python.keras.models import Model
 # from keras.optimizers import SGD
 import lasagne
 
